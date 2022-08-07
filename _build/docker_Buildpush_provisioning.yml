@@ -3,6 +3,7 @@ trigger:
   branches:
     include:
     - develop
+    - DEV_Build_Branch
   paths:
     include:
     - src/Provisioning/

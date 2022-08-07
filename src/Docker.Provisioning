@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+WORKDIR /tmp
+
+COPY . ./
+
+RUN dotnet restore ./Provisioning.Tests/Provisioning.Tests.csproj
+RUN dotnet test ./Provisioning.Tests/Provisioning.Tests.csproj
+
+RUN dotnet restore ./Provisioning/Provisioning.csproj
+RUN dotnet publish ./Provisioning/Provisioning.csproj -c Release --self-contained false -o /opt/Provisioning
+
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+
+ARG CONFIG_DIR=/etc/opt/Provisioning/
+ENV CONFIG_DIR $CONFIG_DIR
+ENV ASPNETCORE_URLS=http://*:5001
+
+EXPOSE 5001
+
+RUN useradd -m -s /bin/bash provisioning
+
+COPY --from=build --chown=provisioning:provisioning /opt/Provisioning/ /opt/Provisioning/
+
+RUN mkdir ${CONFIG_DIR} && mv /opt/Provisioning/appsettings.* ${CONFIG_DIR}
+
+USER provisioning
+
+WORKDIR /opt/Provisioning
+
+ENTRYPOINT ["dotnet", "Provisioning.dll"]

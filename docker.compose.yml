@@ -1,0 +1,12 @@
+version: “3.3”
+services:
+  db:
+    image: postgres
+    container_name: mypostgres2
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d/
+      - ./pgdata:/var/lib/postgresql
+    env_file:
+      - pg.env
+    ports:
+      - “9000:5432”

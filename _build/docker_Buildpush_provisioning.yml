@@ -1,0 +1,23 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - develop
+  paths:
+    include:
+    - src/Provisioning/
+    - src/Provisioning.Tests/
+
+resources:
+  repositories: 
+  - repository: templates
+    type: git
+    name: Develop/CICD.Template
+    ref: feature/microservices_template
+
+jobs:
+- template: _templates/microservices_docker_build-push_steps_with_params.yml@templates
+  parameters:
+    configFilePath: 'src/Provisioning/GitVersion.yml'
+    repositoryName: 'devgroup/foodorder.provisioning'
+    dockerFile: 'src/Dockerfile.Provisioning'
